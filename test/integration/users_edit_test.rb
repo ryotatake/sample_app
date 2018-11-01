@@ -15,10 +15,10 @@ class UsersEditTest < ActionDispatch::IntegrationTest
     assert_select "div.alert", count: 1
   end
   
-  test "successful edit" do
-    log_in_as(@user)
+  test "successful edit with friendly forwarding" do
     get edit_user_path(@user)
-    assert_template 'users/edit'
+    log_in_as(@user)
+    assert_redirected_to edit_user_url(@user)
     name = "Foo Bar"
     email = "foo@bar.com"
     patch user_path(@user), params: { user: { name: name, email: email, password: "", password_confirmation: "" } }
@@ -27,5 +27,8 @@ class UsersEditTest < ActionDispatch::IntegrationTest
     @user.reload
     assert_equal name, @user.name
     assert_equal email, @user.email
+    delete logout_path
+    log_in_as(@user)
+    assert_nil session[:forwarding_url]
   end 
 end
